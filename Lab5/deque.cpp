@@ -4,16 +4,26 @@
 
 using namespace std;
 
-bool deque::is_empty()
+bool deque::is_empty() const
 //is list empty
 {
-	return deque::first_ == nullptr;
+	return deque::first == nullptr;
 }
 
-void deque::rand_fill(int size) // generate one random element
+bool deque::is_full() const
+{
+	return size == max_size;
+}
+
+bool deque::is_even(const int number)
+{
+	return  number % 2 == 0;
+}
+
+void deque::rand_fill(const int amount) // generate one random element
 {
 	srand(time(nullptr));
-	for(int i =0;i<size;i++)
+	for(int i =0;i<amount;i++)
 	{
 	push_back(rand()%101);
 	}
@@ -21,59 +31,91 @@ void deque::rand_fill(int size) // generate one random element
 
 void  deque::push_back(const int new_data) // adds element to the end of list
 {
-	const auto new_elem = new node(new_data); // element init
-	if (is_empty()) // is list empty
+	if(is_full())
 	{
-		deque::first_ = new_elem; // adding element
-		deque::last_ = new_elem;
-		first_->next=first_;
 		return;
 	}
-	deque::last_->next = new_elem; //if list not empty
-	deque::last_ = new_elem;  //then we point that new element is after last element in list
-	last_->next=first_;
+	const auto new_elem = new node(new_data); // element init
+	++size;
+	if (is_empty()) // is list empty
+	{
+		deque::first = new_elem; // adding element
+		deque::last = new_elem;
+		first->next=first;
+		return;
+	}
+	deque::last->next = new_elem; //if list not empty
+	deque::last = new_elem;  //then we point that new element is after last element in list
+	last->next=first;
+	if(is_even(new_data) and new_data!=0)
+	{
+		push_back(0);
+	}
 }
 
 void deque::push_front(const int new_data)
 {
-	const auto new_elem = new node(new_data); // element init
-	node* second = first_;
-	if (is_empty()) // is list empty
+	if(is_full())
 	{
-		deque::first_ = new_elem; // adding element
-		deque::last_ = new_elem;
-		first_->next=first_;
 		return;
 	}
-	first_ = new_elem;
+	++size;
+	const auto new_elem = new node(new_data); // element init
+	node* second = first;
+	if (is_empty()) // is list empty
+	{
+		deque::first = new_elem; // adding element
+		deque::last = new_elem;
+		first->next=first;
+		return;
+	}
+	first = new_elem;
 	new_elem->next=second;
-	last_->next=first_;
+	last->next=first;
+	if(is_even(new_data) and new_data!=0)
+	{
+		push_back(0);
+	}
 }
 
-void deque::pop_back()
+void deque::pop_back() const
 {
-	std::cout<<last_->val;
-	delete last_;
+	if(is_empty())
+	{
+		return;
+	}
+	std::cout<<last->val;
+	delete last;
 }
 
-void deque::pop_front()
+void deque::pop_front() const
 {
-	std::cout<<first_->val;
-	delete first_;
+	if(is_empty())
+	{
+		return;
+	}
+	std::cout<<first->val;
+	delete first;
+	
 }
 
 void deque::clear()
 {
+	if(is_empty())
+	{
+		return;
+	}
 	do
 	{
-		node* temp = deque::first_; 
-		deque::first_ = deque::first_->next; //delete first element and assign first second element
-		last_->next = first_->next;
+		node* temp = deque::first; 
+		deque::first = deque::first->next; //delete first element and assign first second element
+		last->next = first->next;
 		delete temp; //delete element
-	}while(deque::first_!= last_);
-	delete first_;
-	first_=nullptr;
+	}while(deque::first!= last);
+	delete first;
+	first=nullptr;
 	  //while there are an element avalaible
+	size=0;
 }
 
 void deque::delete_element(const int key)
@@ -84,18 +126,18 @@ void deque::delete_element(const int key)
 		cout<<"Element does not exist.\n";
 		return;
 	}
+	--size;
 	node* next_el= del_el->next; //remember which element stands after deleted
-	node* node1 = deque::first_;
-	node* second = deque::first_->next;
-
+	node* node1 = deque::first;
+	node* second = deque::first->next;
 	do
 	 { //while there are an element 
 		if(node1->next==del_el) //find element before deleted element
 		{
-			if(node1->next==last_)
+			if(node1->next==last)
 			{
 				node1->next=next_el; // rechain list without that element
-				last_=node1;
+				last=node1;
 				delete del_el; //deleting element
 				return;
 			}
@@ -104,7 +146,7 @@ void deque::delete_element(const int key)
 			return;
 		}
 		node1 = node1->next;
-	}while (node1!=last_);
+	}while (node1!=last);
 	if(node1->next==del_el) //find element before deleted element
 		{
 			node1->next=second; // rechain list without that element
@@ -112,10 +154,10 @@ void deque::delete_element(const int key)
 		}
 }
 
-node* deque::find(int key)
+node* deque::find(int key) const
 {
 	
-	node* node1 = deque::first_;
+	node* node1 = deque::first;
 	do
 	{ //while there are an element 
 		if(key == node1->val)
@@ -123,7 +165,7 @@ node* deque::find(int key)
 		return node1;	
 		}
 		node1 = node1->next;
-	}while (node1!=last_) ;
+	}while (node1!=last) ;
 	if(key == node1->val)
 	{
 		return node1;	
@@ -131,7 +173,7 @@ node* deque::find(int key)
 	return nullptr; // if element not found
 }
 
-void deque::show() 
+void deque::show() const
 {
 	if (is_empty()) 
 	{
@@ -152,13 +194,13 @@ void deque::show()
 	}
 
 	cout<<static_cast<char>(185)<<endl;
-	node* node1 = deque::first_;
+	node* node1 = deque::first;
 	
 	do
 	{ //while there are an element 
 		cout <<static_cast<char>(186)<<setw(10)<< node1->val<<right <<static_cast<char>(186)<<left<< endl;
 		node1 = node1->next;
-	}while (node1!=last_);
+	}while (node1!=last);
 	cout <<static_cast<char>(186)<<setw(10)<< node1->val <<right <<static_cast<char>(186)<<left<< endl;
 		node1 = node1->next;
 	cout<<static_cast<char>(200);

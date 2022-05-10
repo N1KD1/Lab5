@@ -1,9 +1,13 @@
 ﻿#include <iostream>
 #include "deque.h"
-constexpr auto MAX_SIZE = 10;;
+
 int main()
 {
 	deque new_deque;
 	
+	new_deque.rand_fill(20);
+	new_deque.show();
+
+	std::cout<<new_deque.size;
 }
 
